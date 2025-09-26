@@ -1,5 +1,5 @@
 variable "DOCKERHUB_REPO" {
-  default = "runpod"
+  default = "sanochkinl/runpod_vllm"
 }
 
 variable "DOCKERHUB_IMG" {
