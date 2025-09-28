@@ -10,11 +10,11 @@ RUN ldconfig /usr/local/cuda-12.1/compat/
 COPY builder/requirements.txt /requirements.txt
 RUN --mount=type=cache,target=/root/.cache/pip \
     python3 -m pip install --upgrade pip && \
-    python3 -m pip install --upgrade -r /requirements.txt \
-    python3 -m pip install git+https://github.com/huggingface/transformers \
-    python3 -m pip install accelerate \
-    python3 -m pip install qwen-omni-utils -U \
-    python3 -m pip install -U flash-attn --no-build-isolation
+    python3 -m pip install --upgrade -r /requirements.txt && \
+    python3 -m pip install git+https://github.com/huggingface/transformers && \
+    python3 -m pip install accelerate && \
+    python3 -m pip install qwen-omni-utils -U && \
+    # python3 -m pip install -U flash-attn --no-build-isolation
 
 # Install vLLM (switching back to pip installs since issues that required building fork are fixed and space optimization is not as important since caching) and FlashInfer
 RUN python3 -m pip install vllm==0.10.0 && \
