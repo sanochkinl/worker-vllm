@@ -21,8 +21,8 @@ RUN --mount=type=cache,target=/root/.cache/pip \
     python3 -m pip install flashinfer -i https://flashinfer.ai/whl/cu121/torch2.3 --no-cache-dir
 
 # Setup for Option 2: Building the Image with the Model included
-ARG MODEL_NAME=""
-ARG TOKENIZER_NAME=""
+ARG MODEL_NAME="Qwen/Qwen3-VL-235B-A22B-Instruct"
+ARG TOKENIZER_NAME="Qwen/Qwen3-VL-235B-A22B-Instruct"
 ARG BASE_PATH="/runpod-volume"
 ARG QUANTIZATION=""
 ARG MODEL_REVISION=""
