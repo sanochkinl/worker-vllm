@@ -13,11 +13,11 @@ RUN --mount=type=cache,target=/root/.cache/pip \
     python3 -m pip install --upgrade -r /requirements.txt && \
     python3 -m pip install git+https://github.com/huggingface/transformers && \
     python3 -m pip install accelerate && \
-    python3 -m pip install qwen-omni-utils -U \
+    python3 -m pip install qwen-omni-utils -U && \
     # python3 -m pip install -U flash-attn --no-build-isolation
 
 # Install vLLM (switching back to pip installs since issues that required building fork are fixed and space optimization is not as important since caching) and FlashInfer
-RUN python3 -m pip install vllm==0.10.0 && \
+    python3 -m pip install vllm==0.10.0 && \
     python3 -m pip install flashinfer -i https://flashinfer.ai/whl/cu121/torch2.3
 
 # Setup for Option 2: Building the Image with the Model included
