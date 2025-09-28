@@ -13,10 +13,20 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up QEMU (multi-arch, optional)
+      # Free 10–20+ GB on the runner (dotnet, ghc, android SDKs)
+      - name: Free space on runner
+        run: |
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /usr/local/lib/android
+          sudo apt-get clean
+          sudo rm -rf /var/lib/apt/lists/*
+          df -h
+
+      - name: Set up QEMU (optional; safe to keep)
         uses: docker/setup-qemu-action@v3
 
-      - name: Set up Buildx
+      - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
       - name: Login to Docker Hub
@@ -25,14 +35,15 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build & Push (linux/amd64 for GPU hosts)
+      # Build & push with BuildKit cache (gha) and linux/amd64 (GPU hosts)
+      - name: Build and Push
         uses: docker/build-push-action@v6
         with:
           context: .
           push: true
           platforms: linux/amd64
           tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/my-vllm-qwen:latest
-            ${{ secrets.DOCKERHUB_USERNAME }}/my-vllm-qwen:${{ github.sha }}
-          build-args: |
-            TRANSFORMERS_REF=main
+            ${{ secrets.DOCKERHUB_USERNAME }}/my-vllm-image:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/my-vllm-image:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
