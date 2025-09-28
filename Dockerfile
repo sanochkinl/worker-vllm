@@ -10,18 +10,14 @@ RUN ldconfig /usr/local/cuda-12.1/compat/
 COPY builder/requirements.txt /requirements.txt
 RUN --mount=type=cache,target=/root/.cache/pip \
     python3 -m pip install --upgrade pip && \
-    git clone -b qwen3_omni https://github.com/wangxiongts/vllm.git && \
-    cd vllm && \
-    pip install -r requirements/build.txt && \
-    pip install -r requirements/cuda.txt && \
-    VLLM_PRECOMPILED_WHEEL_LOCATION=https://wheels.vllm.ai/a5dd03c1ebc5e4f56f3c9d3dc0436e9c582c978f/vllm-0.9.2-cp38-abi3-manylinux1_x86_64.whl \
-    VLLM_USE_PRECOMPILED=1 \
-    pip install -e . -v --no-build-isolation --no-cache-dir && \
-    cd .. && rm -rf vllm && \
     python3 -m pip install --upgrade -r /requirements.txt --no-cache-dir && \
     python3 -m pip install git+https://github.com/huggingface/transformers  --no-cache-dir && \
     python3 -m pip install accelerate --no-cache-dir && \
     python3 -m pip install qwen-omni-utils -U --no-cache-dir && \
+    # python3 -m pip install -U flash-attn --no-build-isolation
+
+# Install vLLM (switching back to pip installs since issues that required building fork are fixed and space optimization is not as important since caching) and FlashInfer
+    python3 -m pip install vllm==0.10.0 --no-cache-dir && \
     python3 -m pip install flashinfer -i https://flashinfer.ai/whl/cu121/torch2.3 --no-cache-dir
 
 # Setup for Option 2: Building the Image with the Model included
