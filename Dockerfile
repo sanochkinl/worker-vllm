@@ -11,6 +11,9 @@ RUN python3 -m pip install --upgrade --no-cache-dir pip setuptools wheel
 
 RUN python3 -m pip install --no-cache-dir uv
 
+SHELL ["/bin/bash","-lc"]
+RUN set -euxo pipefail
+
 # torch first (still recommended)
 RUN --mount=type=cache,target=/root/.cache/pip \
     uv pip install --no-cache-dir --index-url https://download.pytorch.org/whl/cu121 \
