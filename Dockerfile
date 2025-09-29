@@ -18,21 +18,23 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 # Install vLLM nightly + Qwen-VL utils
 RUN --mount=type=cache,target=/root/.cache/pip \
     python3 -m pip install --no-cache-dir -U vllm \
-      --extra-index-url https://wheels.vllm.ai/nightly && \
-    python3 -m pip install --no-cache-dir qwen-vl-utils==0.0.14
-
-# 4) Твои зависимости
-COPY builder/requirements.txt /requirements.txt
-RUN --mount=type=cache,target=/root/.cache/pip \
-    python3 -m pip install --no-cache-dir -r /requirements.txt && \
-    python3 -m pip install --no-cache-dir "git+https://github.com/huggingface/transformers.git" && \
-    python3 -m pip install --no-cache-dir accelerate qwen-omni-utils -U
+      --extra-index-url https://wheels.vllm.ai/nightly  \
 
 # 5) FlashInfer — ОТДЕЛЬНЫЙ RUN (и индекс должен совпадать: cu121 + torch2.3)
 RUN --mount=type=cache,target=/root/.cache/pip \
     python3 -m pip install --no-cache-dir \
       -i https://flashinfer.ai/whl/cu121/torch2.3 \
       flashinfer
+
+# 4) Твои зависимости
+COPY builder/requirements.txt /requirements.txt
+RUN --mount=type=cache,target=/root/.cache/pip \
+    python3 -m pip install --no-cache-dir -r /requirements.txt && \
+    python3 -m pip install --no-cache-dir git+https://github.com/huggingface/transformers.git && \
+    python3 -m pip install --no-cache-dir qwen-vl-utils==0.0.14 && \
+    python3 -m pip install --no-cache-dir accelerate qwen-omni-utils -U
+
+
 
 # Setup for Option 2: Building the Image with the Model included
 ARG MODEL_NAME=""
