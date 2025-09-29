@@ -6,6 +6,12 @@ RUN apt-get update -y \
 
 RUN ldconfig /usr/local/cuda-12.1/compat/
 
+RUN --mount=type=cache,target=/root/.cache/pip \
+    python3 pip install -U vllm \
+        --torch-backend=auto \
+        --extra-index-url https://wheels.vllm.ai/nightly && \
+    python3 pip install qwen-vl-utils==0.0.14  --no-cache-dir  && \
+
 # Install Python dependencies
 COPY builder/requirements.txt /requirements.txt
 RUN --mount=type=cache,target=/root/.cache/pip \
@@ -17,7 +23,7 @@ RUN --mount=type=cache,target=/root/.cache/pip \
     # python3 -m pip install -U flash-attn --no-build-isolation
 
 # Install vLLM (switching back to pip installs since issues that required building fork are fixed and space optimization is not as important since caching) and FlashInfer
-    python3 -m pip install vllm==0.10.0 --no-cache-dir && \
+    # python3 -m pip install vllm==0.10.0 --no-cache-dir && \
     python3 -m pip install flashinfer -i https://flashinfer.ai/whl/cu121/torch2.3 --no-cache-dir
 
 # Setup for Option 2: Building the Image with the Model included
