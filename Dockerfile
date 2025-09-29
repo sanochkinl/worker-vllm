@@ -9,17 +9,19 @@ RUN apt-get update -y && apt-get install -y --no-install-recommends \
 # 1) Инструменты pip
 RUN python3 -m pip install --upgrade --no-cache-dir pip setuptools wheel
 
-# 2) Torch 2.3.x cu121 — ОБЯЗАТЕЛЬНО перед vLLM/flashinfer
+RUN python3 -m pip install --no-cache-dir uv
+
+# torch first (still recommended)
 RUN --mount=type=cache,target=/root/.cache/pip \
-    python3 -m pip install --no-cache-dir --index-url https://download.pytorch.org/whl/cu121 \
+    uv pip install --no-cache-dir --index-url https://download.pytorch.org/whl/cu121 \
       torch==2.3.1 torchvision==0.18.1
 
-# 3) vLLM nightly + qwen-vl-utils
+# now uv + vLLM nightly with the flag
 RUN --mount=type=cache,target=/root/.cache/pip \
-    python3 -m pip install --no-cache-dir -U vllm \
+    uv pip install -U vllm \
       --extra-index-url https://wheels.vllm.ai/nightly \
       --torch-backend=auto && \
-    python3 -m pip install --no-cache-dir qwen-vl-utils==0.0.14
+    uv pip install qwen-vl-utils==0.0.14
 
 # 4) Твои зависимости
 COPY builder/requirements.txt /requirements.txt
