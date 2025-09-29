@@ -1,3 +1,5 @@
+# syntax=docker/dockerfile:1.7
+
 FROM nvidia/cuda:12.1.0-base-ubuntu22.04
 
 RUN apt-get update -y \
@@ -5,6 +7,13 @@ RUN apt-get update -y \
     && apt-get install -y python3-pip
 
 RUN ldconfig /usr/local/cuda-12.1/compat/
+
+
+# Install Torch 2.3.x cu121 FIRST (so vLLM/FlashInfer match it)
+RUN --mount=type=cache,target=/root/.cache/pip \
+    python3 -m pip install --upgrade --no-cache-dir pip setuptools wheel && \
+    python3 -m pip install --no-cache-dir --index-url https://download.pytorch.org/whl/cu121 \
+      torch==2.3.1 torchvision==0.18.1
 
 RUN --mount=type=cache,target=/root/.cache/pip \
     python3 -m pip install --upgrade --no-cache-dir pip setuptools wheel && \
