@@ -10,4 +10,4 @@ pydantic-settings
 hf-transfer
 bitsandbytes>=0.45.0
 kernels
-torch==2.6.0
+# torch==2.6.0

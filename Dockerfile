@@ -19,10 +19,10 @@ RUN --mount=type=cache,target=/root/.cache/pip \
       --extra-index-url https://wheels.vllm.ai/nightly
 
 # FlashInfer for cu126 / torch2.6
-RUN --mount=type=cache,target=/root/.cache/pip \
-    python3 -m pip install --no-cache-dir \
-      -i https://flashinfer.ai/whl/cu126/torch2.6 \
-      flashinfer
+# RUN --mount=type=cache,target=/root/.cache/pip \
+#     python3 -m pip install --no-cache-dir \
+#       -i https://flashinfer.ai/whl/cu126/torch2.6 \
+#       flashinfer
 
 COPY builder/requirements.txt /requirements.txt
 RUN --mount=type=cache,target=/root/.cache/pip \
