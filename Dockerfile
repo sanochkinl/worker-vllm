@@ -1,30 +1,25 @@
 # syntax=docker/dockerfile:1.7
 FROM nvidia/cuda:12.1.0-base-ubuntu22.04
 
-# 0) Базовые пакеты (TLS, компиляторы)
-RUN apt-get update -y && apt-get install -y --no-install-recommends \
-    git ca-certificates build-essential python3 python3-pip python3-dev curl && \
-    rm -rf /var/lib/apt/lists/*
+# Base OS deps (TLS + build tools + Python)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates build-essential python3 python3-pip python3-dev git curl \
+ && rm -rf /var/lib/apt/lists/*
 
-# 1) Инструменты pip
+# Upgrade pip tooling
 RUN python3 -m pip install --upgrade --no-cache-dir pip setuptools wheel
 
-RUN python3 -m pip install --no-cache-dir uv
-
-SHELL ["/bin/bash","-lc"]
-RUN set -euxo pipefail
-
-# torch first (still recommended)
+# Install Torch cu121 FIRST (required for vLLM/FlashInfer combos)
 RUN --mount=type=cache,target=/root/.cache/pip \
-    uv pip install --no-cache-dir --index-url https://download.pytorch.org/whl/cu121 \
+    python3 -m pip install --no-cache-dir \
+      --index-url https://download.pytorch.org/whl/cu121 \
       torch==2.3.1 torchvision==0.18.1
 
-# now uv + vLLM nightly with the flag
+# Install vLLM nightly + Qwen-VL utils
 RUN --mount=type=cache,target=/root/.cache/pip \
-    uv pip install -U vllm \
-      --extra-index-url https://wheels.vllm.ai/nightly \
-      --torch-backend=auto && \
-    uv pip install qwen-vl-utils==0.0.14
+    python3 -m pip install --no-cache-dir -U vllm \
+      --extra-index-url https://wheels.vllm.ai/nightly && \
+    python3 -m pip install --no-cache-dir qwen-vl-utils==0.0.14
 
 # 4) Твои зависимости
 COPY builder/requirements.txt /requirements.txt
