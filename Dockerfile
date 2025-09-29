@@ -7,10 +7,11 @@ RUN apt-get update -y \
 RUN ldconfig /usr/local/cuda-12.1/compat/
 
 RUN --mount=type=cache,target=/root/.cache/pip \
-    python3 pip install -U vllm \
-        --torch-backend=auto \
-        --extra-index-url https://wheels.vllm.ai/nightly && \
-    python3 pip install qwen-vl-utils==0.0.14  --no-cache-dir  && \
+    python3 -m pip install --upgrade --no-cache-dir pip setuptools wheel && \
+    python3 -m pip install --no-cache-dir -U vllm \
+      --extra-index-url https://wheels.vllm.ai/nightly \
+      --torch-backend=auto && \
+    python3 -m pip install qwen-vl-utils==0.0.14  --no-cache-dir  && \
 
 # Install Python dependencies
 COPY builder/requirements.txt /requirements.txt
