@@ -1,39 +1,35 @@
 # syntax=docker/dockerfile:1.7
-FROM nvidia/cuda:12.1.0-base-ubuntu22.04
+FROM nvidia/cuda:12.6.2-runtime-ubuntu22.04
 
-# Base OS deps (TLS + build tools + Python)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates build-essential python3 python3-pip python3-dev git curl \
  && rm -rf /var/lib/apt/lists/*
 
-# Upgrade pip tooling
 RUN python3 -m pip install --upgrade --no-cache-dir pip setuptools wheel
 
-# Install Torch cu121 FIRST (required for vLLM/FlashInfer combos)
+# Torch 2.6.0 (cu126) + torchvision 0.21.0
 RUN --mount=type=cache,target=/root/.cache/pip \
     python3 -m pip install --no-cache-dir \
-      --index-url https://download.pytorch.org/whl/cu121 \
-      torch==2.3.1 torchvision==0.18.1
+      --index-url https://download.pytorch.org/whl/cu126 \
+      torch==2.6.0 torchvision==0.21.0
 
-# Install vLLM nightly + Qwen-VL utils
+# vLLM nightly
 RUN --mount=type=cache,target=/root/.cache/pip \
     python3 -m pip install --no-cache-dir -U vllm \
-      --extra-index-url https://wheels.vllm.ai/nightly  \
+      --extra-index-url https://wheels.vllm.ai/nightly
 
-# 5) FlashInfer — ОТДЕЛЬНЫЙ RUN (и индекс должен совпадать: cu121 + torch2.3)
+# FlashInfer for cu126 / torch2.6
 RUN --mount=type=cache,target=/root/.cache/pip \
     python3 -m pip install --no-cache-dir \
-      -i https://flashinfer.ai/whl/cu121/torch2.3 \
+      -i https://flashinfer.ai/whl/cu126/torch2.6 \
       flashinfer
 
-# 4) Твои зависимости
 COPY builder/requirements.txt /requirements.txt
 RUN --mount=type=cache,target=/root/.cache/pip \
     python3 -m pip install --no-cache-dir -r /requirements.txt && \
-    python3 -m pip install --no-cache-dir git+https://github.com/huggingface/transformers.git && \
+    python3 -m pip install --no-cache-dir "git+https://github.com/huggingface/transformers.git" && \
     python3 -m pip install --no-cache-dir qwen-vl-utils==0.0.14 && \
     python3 -m pip install --no-cache-dir accelerate qwen-omni-utils -U
-
 
 
 # Setup for Option 2: Building the Image with the Model included
