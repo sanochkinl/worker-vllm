@@ -1,40 +1,38 @@
 # syntax=docker/dockerfile:1.7
-
 FROM nvidia/cuda:12.1.0-base-ubuntu22.04
 
-RUN apt-get update -y \
-    && apt-get install -y git \
-    && apt-get install -y python3-pip
+# 0) Базовые пакеты (TLS, компиляторы)
+RUN apt-get update -y && apt-get install -y --no-install-recommends \
+    git ca-certificates build-essential python3 python3-pip python3-dev curl && \
+    rm -rf /var/lib/apt/lists/*
 
-RUN ldconfig /usr/local/cuda-12.1/compat/
+# 1) Инструменты pip
+RUN python3 -m pip install --upgrade --no-cache-dir pip setuptools wheel
 
-
-# Install Torch 2.3.x cu121 FIRST (so vLLM/FlashInfer match it)
+# 2) Torch 2.3.x cu121 — ОБЯЗАТЕЛЬНО перед vLLM/flashinfer
 RUN --mount=type=cache,target=/root/.cache/pip \
-    python3 -m pip install --upgrade --no-cache-dir pip setuptools wheel && \
     python3 -m pip install --no-cache-dir --index-url https://download.pytorch.org/whl/cu121 \
       torch==2.3.1 torchvision==0.18.1
 
+# 3) vLLM nightly + qwen-vl-utils
 RUN --mount=type=cache,target=/root/.cache/pip \
-    python3 -m pip install --upgrade --no-cache-dir pip setuptools wheel && \
     python3 -m pip install --no-cache-dir -U vllm \
       --extra-index-url https://wheels.vllm.ai/nightly \
       --torch-backend=auto && \
-    python3 -m pip install qwen-vl-utils==0.0.14  --no-cache-dir
+    python3 -m pip install --no-cache-dir qwen-vl-utils==0.0.14
 
-# Install Python dependencies
+# 4) Твои зависимости
 COPY builder/requirements.txt /requirements.txt
 RUN --mount=type=cache,target=/root/.cache/pip \
-    python3 -m pip install --upgrade pip && \
-    python3 -m pip install --upgrade -r /requirements.txt --no-cache-dir && \
-    python3 -m pip install git+https://github.com/huggingface/transformers  --no-cache-dir && \
-    python3 -m pip install accelerate --no-cache-dir && \
-    python3 -m pip install qwen-omni-utils -U --no-cache-dir && \
-    # python3 -m pip install -U flash-attn --no-build-isolation
+    python3 -m pip install --no-cache-dir -r /requirements.txt && \
+    python3 -m pip install --no-cache-dir "git+https://github.com/huggingface/transformers.git" && \
+    python3 -m pip install --no-cache-dir accelerate qwen-omni-utils -U
 
-# Install vLLM (switching back to pip installs since issues that required building fork are fixed and space optimization is not as important since caching) and FlashInfer
-    # python3 -m pip install vllm==0.10.0 --no-cache-dir && \
-    python3 -m pip install flashinfer -i https://flashinfer.ai/whl/cu121/torch2.3 --no-cache-dir
+# 5) FlashInfer — ОТДЕЛЬНЫЙ RUN (и индекс должен совпадать: cu121 + torch2.3)
+RUN --mount=type=cache,target=/root/.cache/pip \
+    python3 -m pip install --no-cache-dir \
+      -i https://flashinfer.ai/whl/cu121/torch2.3 \
+      flashinfer
 
 # Setup for Option 2: Building the Image with the Model included
 ARG MODEL_NAME=""
