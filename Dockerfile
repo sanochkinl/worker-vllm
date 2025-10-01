@@ -31,6 +31,7 @@ RUN --mount=type=cache,target=/root/.cache/pip \
     python3 -m pip install --no-cache-dir qwen-vl-utils==0.0.14 && \
     python3 -m pip install --no-cache-dir accelerate qwen-omni-utils -U
 
+RUN mkdir -p /models/mmcache
 
 # Setup for Option 2: Building the Image with the Model included
 ARG MODEL_NAME=""
