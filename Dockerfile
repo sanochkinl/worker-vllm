@@ -21,12 +21,12 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 
 RUN --mount=type=cache,target=/root/.cache/pip \
     python3 -m pip install --no-cache-dir -r /requirements.txt && \
-    python3 -m pip install --no-cache-dir "git+https://github.com/huggingface/transformers.git" && \
-    python3 -m pip install --no-cache-dir qwen-vl-utils==0.0.14 && \
-    python3 -m pip install --no-cache-dir accelerate qwen-omni-utils -U
+    python3 -m pip install --no-cache-dir "git+https://github.com/huggingface/transformers.git"
+    # python3 -m pip install --no-cache-dir qwen-vl-utils==0.0.14 && \
+    # python3 -m pip install --no-cache-dir accelerate qwen-omni-utils -U
 
 # Install vLLM (switching back to pip installs since issues that required building fork are fixed and space optimization is not as important since caching) and FlashInfer
-RUN python3 -m pip install --no-cache-dir flashinfer -i https://flashinfer.ai/whl/cu121/torch2.3
+# RUN python3 -m pip install --no-cache-dir flashinfer -i https://flashinfer.ai/whl/cu121/torch2.3
 
 
 
