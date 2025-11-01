@@ -1,7 +1,10 @@
 FROM nvidia/cuda:12.1.0-base-ubuntu22.04
 
-RUN apt-get update -y \
-    && apt-get install -y python3-pip
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates build-essential python3 python3-pip python3-dev git curl \
+ && rm -rf /var/lib/apt/lists/*
+
+RUN python3 -m pip install --upgrade --no-cache-dir pip setuptools wheel
 
 RUN ldconfig /usr/local/cuda-12.1/compat/
 
@@ -23,7 +26,7 @@ RUN --mount=type=cache,target=/root/.cache/pip \
     python3 -m pip install --no-cache-dir accelerate qwen-omni-utils -U
 
 # Install vLLM (switching back to pip installs since issues that required building fork are fixed and space optimization is not as important since caching) and FlashInfer
-RUN python3 -m pip install flashinfer -i https://flashinfer.ai/whl/cu121/torch2.3
+RUN python3 -m pip install --no-cache-dir flashinfer -i https://flashinfer.ai/whl/cu121/torch2.3
 
 
 
